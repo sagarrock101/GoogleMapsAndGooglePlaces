@@ -125,6 +125,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         Toast.makeText(this, "Map is Ready", Toast.LENGTH_SHORT).show()
         Log.e(TAG, "onMapReady: map is ready")
         mMap = googleMap
+
+        if(mLocationPermissionsGranted) {
+            getDeviceLocation()
+            mMap!!.isMyLocationEnabled = true
+        }
     }
 
     private fun getDeviceLocation() {
@@ -139,7 +144,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         Log.e(TAG, "onComplete: Found location")
                         var currentLocation = it.result as Location
                         moveCamera(LatLng(currentLocation.latitude, currentLocation.longitude), DEFAULT_ZOOM)
-                        mMap!!.isMyLocationEnabled = true
+//                        mMap!!.isMyLocationEnabled = true
 
 
                     } else {
