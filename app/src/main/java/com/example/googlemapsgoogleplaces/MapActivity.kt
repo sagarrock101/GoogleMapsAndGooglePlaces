@@ -25,6 +25,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import java.io.IOException
 
 
@@ -156,7 +157,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         Log.e(TAG, "onComplete: Found location")
                    if(it != null) {
                        val currentLocation = it.result as Location
-                       moveCamera(LatLng(currentLocation.latitude, currentLocation.longitude), DEFAULT_ZOOM)
+                       moveCamera(LatLng(currentLocation.latitude, currentLocation.longitude),
+                           DEFAULT_ZOOM, "My Location")
                    }
 //                        mMap!!.isMyLocationEnabled = true
 
@@ -174,12 +176,19 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
-    private fun moveCamera(latLng: LatLng, zoom: Float ) {
+    private fun moveCamera(latLng: LatLng, zoom: Float, title: String ) {
         Log.e(TAG, "moveCamera: moving camera to : $latLng")
 //        mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
         val cameraPosition =
-            CameraPosition.Builder().target(latLng).zoom(DEFAULT_ZOOM).build()
+            CameraPosition.Builder().target(latLng).zoom(zoom).build()
         mMap?.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+
+        var markerOptions = MarkerOptions()
+            .position(latLng)
+            .title(title)
+
+        mMap?.addMarker(markerOptions)
+
 
     }
 
@@ -208,6 +217,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             if(list.isNotEmpty()) {
                 var address = list[0]
                 Log.e(TAG, "geoLocate: found a location$address")
+                moveCamera(LatLng(address.latitude, address.longitude), DEFAULT_ZOOM, address.getAddressLine(0))
             }
         } catch (e: IOException) {
             Log.e(TAG, "geoLocate: exception" + e.message)
