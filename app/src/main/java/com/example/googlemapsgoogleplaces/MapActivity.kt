@@ -2,9 +2,14 @@ package com.example.googlemapsgoogleplaces
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +23,9 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import java.io.IOException
 
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -37,12 +44,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mLocationPermissionsGranted = false
     private var mMap: GoogleMap? = null
 
+    private var editText: EditText? = null
+
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = setContentView(this, R.layout.activity_map)
         getLocationPermission()
         getDeviceLocation()
-
+        editText = findViewById(R.id.search_bar)
+        init()
     }
 
     private fun getLocationPermission() {
@@ -62,6 +72,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             ) {
                 mLocationPermissionsGranted = true
                 initMap()
+
             } else {
                 ActivityCompat.requestPermissions(
                     this,
@@ -129,6 +140,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         if(mLocationPermissionsGranted) {
             getDeviceLocation()
             mMap!!.isMyLocationEnabled = true
+            mMap!!.uiSettings.isMyLocationButtonEnabled = false
         }
     }
 
@@ -142,8 +154,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 location?.addOnCompleteListener {it ->
                     if(it.isSuccessful) {
                         Log.e(TAG, "onComplete: Found location")
-                        var currentLocation = it.result as Location
-                        moveCamera(LatLng(currentLocation.latitude, currentLocation.longitude), DEFAULT_ZOOM)
+                   if(it != null) {
+                       val currentLocation = it.result as Location
+                       moveCamera(LatLng(currentLocation.latitude, currentLocation.longitude), DEFAULT_ZOOM)
+                   }
 //                        mMap!!.isMyLocationEnabled = true
 
 
@@ -162,6 +176,44 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun moveCamera(latLng: LatLng, zoom: Float ) {
         Log.e(TAG, "moveCamera: moving camera to : $latLng")
-        mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
+//        mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
+        val cameraPosition =
+            CameraPosition.Builder().target(latLng).zoom(DEFAULT_ZOOM).build()
+        mMap?.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+
     }
+
+    private fun init() {
+        Log.e(TAG, "init: initializing")
+        binding.inputSearch.setOnEditorActionListener { v, actionId, keyEvent ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || keyEvent.getAction() == KeyEvent.ACTION_DOWN || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER
+            ) { //execute our method for searching
+                Toast.makeText(this, "onSearch", Toast.LENGTH_SHORT)
+                    .show()
+                geoLocate()
+            }
+            false
+        }
+
+    }
+
+    private fun geoLocate() {
+        Log.e(TAG, "geoLocate: geolocating")
+        var searchString = binding.inputSearch.text.toString()
+        var geocoder = Geocoder(this)
+        var list: ArrayList<Address>
+
+        try {
+            list = geocoder.getFromLocationName(searchString, 1) as ArrayList<Address>
+            if(list.isNotEmpty()) {
+                var address = list[0]
+                Log.e(TAG, "geoLocate: found a location$address")
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "geoLocate: exception" + e.message)
+
+        }
+    }
+
+
 }
