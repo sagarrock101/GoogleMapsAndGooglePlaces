@@ -100,7 +100,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         when (requestCode) {
             LOCATION_PERMISSION_REQUEST_CODE -> {
-                if (grantResults.size > 0) {
+                if (grantResults.isNotEmpty()) {
                     var i = 0
                     while (i < grantResults.size) {
                         if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
@@ -200,8 +200,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(this, "onSearch", Toast.LENGTH_SHORT)
                     .show()
                 geoLocate()
+
             }
             false
+        }
+
+        binding.icGps.setOnClickListener {
+            getDeviceLocation()
         }
 
     }
@@ -217,7 +222,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             if(list.isNotEmpty()) {
                 var address = list[0]
                 Log.e(TAG, "geoLocate: found a location$address")
-                moveCamera(LatLng(address.latitude, address.longitude), DEFAULT_ZOOM, address.getAddressLine(0))
+                moveCamera(LatLng(address.latitude, address.longitude),
+                    DEFAULT_ZOOM, address.getAddressLine(0))
             }
         } catch (e: IOException) {
             Log.e(TAG, "geoLocate: exception" + e.message)

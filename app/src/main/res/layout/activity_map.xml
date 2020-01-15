@@ -1,6 +1,6 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -50,8 +50,18 @@
                 android:imeOptions="actionDone"
                 android:paddingLeft="20dp" />
 
-                
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </FrameLayout>
+
+        <ImageView
+            android:id="@+id/ic_gps"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_gps"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="70dp"
+            android:layout_marginRight="10dp"
+            android:scaleType="centerCrop"/>
+
+    </RelativeLayout>
 </layout>
